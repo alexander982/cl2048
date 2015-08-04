@@ -50,20 +50,30 @@
 (defn merge-columns [board]
   (reduce #(merge-column % %2) board (range board-width)))
 
+(defn move-row
+  ([board n]
+   (move-row board n :left))
+  ([board n side]
+   (let [ks (for [x (range board-width)] [n x])
+         vs (for [k ks] (board k))
+         nz (vec (filter (complement zero?) vs))
+         n (- board-width (count nz))]
+     (partition 2 2 (interleave ks
+                                (if (= side :left)
+                                  (into nz (repeat n 0))
+                                  (into (vec (repeat n 0)) nz)))))))
+
 (defn move-row-left
   "Move all not empty cells to left side"
   [board n]
-  (let [ks (for [x (range board-width)] [n x])
-        vs (for [k ks] (board k))
-        nz (vec (filter (complement zero?) vs))]
-    (reduce (fn [b [k v]]
-              (assoc b k v))
-            board
-            (partition 2 2(interleave
-                           ks
-                           (into nz
-                                 (repeat (- board-width (count nz))
-                                         0)))))))
+  (reduce (fn [b [k v]] (assoc b k v))
+          board
+          (move-row board n :left)))
+
+(defn move-row-right [board n]
+  (reduce (fn [b [k v]] (assoc b k v))
+          board
+          (move-row board n :right)))
 
 (defn -main
   "I don't do a whole lot ... yet."
