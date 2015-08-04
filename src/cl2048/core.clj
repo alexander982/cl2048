@@ -92,6 +92,31 @@
 
 (defn move-columns-down [board]
   (reduce move-column-down board (range board-height)))
+;;;fixme
+
+(defn move-left [board]
+  (-> board
+      (merge-rows)
+      (move-rows-left)
+      (spawn-cell)))
+
+(defn move-right [board]
+  (-> board
+      (merge-rows)
+      (move-rows-right)
+      (spawn-cell)))
+
+(defn move-up [board]
+  (-> board
+      (merge-columns)
+      (move-columns-up)
+      (spawn-cell)))
+
+(defn move-down [board]
+  (-> board
+      (merge-columns)
+      (move-columns-down)
+      (spawn-cell)))
 
 (defn -main
   "I don't do a whole lot ... yet."
