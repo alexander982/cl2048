@@ -33,16 +33,18 @@
             board ks))
 
 (defn merge-row [board n]
-  (let [ks (map (fn [[a b]] (list [n a] [n b]))
-                (partition 2 1 (range board-width)))]
+  (let [ks (partition 2 1
+                      (filter (fn [k] (not (zero? (board k))))
+                              (for [x (range board-width)] [n x])))] 
     (merge-cells board ks)))
 
 (defn merge-rows [board]
   (reduce #(merge-row % %2) board (range board-height)))
 
 (defn merge-column [board n]
-  (let [ks (map (fn [[a b]] (list [a n] [b n]))
-                (partition 2 1 (range board-height)))]
+  (let [ks (partition 2 1
+                      (filter (fn [k] (not (zero? (board k))))
+                              (for [y (range board-width)] [y n])))]
     (merge-cells board ks)))
 
 (defn merge-columns [board]
