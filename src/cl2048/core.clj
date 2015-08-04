@@ -81,6 +81,18 @@
 (defn move-column-down [board n]
   (reduce assoc-kv board (move-cells board n :down)))
 
+(defn move-rows-left [board]
+  (reduce move-row-left board (range board-width)))
+
+(defn move-rows-right [board]
+  (reduce move-row-right board (range board-width)))
+
+(defn move-columns-up [board]
+  (reduce move-column-up board (range board-height)))
+
+(defn move-columns-down [board]
+  (reduce move-column-down board (range board-height)))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
