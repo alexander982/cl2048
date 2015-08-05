@@ -32,20 +32,24 @@
                 b))
             board ks))
 
+(defn non-empty-row-cells [board n]
+  (partition 2 1
+             (filter (fn [k] (not (zero? (board k))))
+                     (for [x (range board-width)] [n x]))))
+
 (defn merge-row [board n]
-  (let [ks (partition 2 1
-                      (filter (fn [k] (not (zero? (board k))))
-                              (for [x (range board-width)] [n x])))] 
-    (merge-cells board ks)))
+  (merge-cells board (non-empty-row-cells board n)))
 
 (defn merge-rows [board]
   (reduce #(merge-row % %2) board (range board-height)))
 
+(defn non-empty-column-cells [board n]
+  (partition 2 1
+             (filter (fn [k] (not (zero? (board k))))
+                     (for [y (range board-width)] [y n]))))
+
 (defn merge-column [board n]
-  (let [ks (partition 2 1
-                      (filter (fn [k] (not (zero? (board k))))
-                              (for [y (range board-width)] [y n])))]
-    (merge-cells board ks)))
+  (merge-cells board (non-empty-column-cells board n)))
 
 (defn merge-columns [board]
   (reduce #(merge-column % %2) board (range board-width)))
@@ -121,13 +125,21 @@
 (defn merge-cells?
   "Проверяет можно ли объединить ячейки"
   [board ks]
-  (reduce #(fn [t? [k1 k2]]
-             (or t? (= (board k1) (board k2))))
+  (reduce (fn [t? [k1 k2]]
+            (or t? (= (board k1) (board k2))))
           false ks))
+
+(defn merges? [board]
+  (or (reduce (fn [t? n] (or t? (merge-cells?
+                                 board (non-empty-row-cells board n))))
+              false (range board-width))
+      (reduce (fn [t? n] (or t? (merge-cells?
+                                 board (non-empty-column-cells board n))))
+              false (range board-height))))
 
 (defn lose? [board]
   (if (and (= (count (empty-cells board)) 0)
-           )
+           (not (merges? board)))
     true
     false))
 
