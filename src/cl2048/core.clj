@@ -1,8 +1,13 @@
 (ns cl2048.core
+  (:import (java.awt Color Dimension)
+           (javax.swing JPanel JFrame JOptionPane)
+           (java.awt.event ActionListener KeyListener))
   (:gen-class))
 
 (def board-width 4)
 (def board-height 4)
+(def cell-width 60)
+(def cell-height 60)
 
 (defn new-empty-board []
   (apply hash-map (interleave
@@ -137,13 +142,63 @@
                                  board (non-empty-column-cells board n))))
               false (range board-height))))
 
-(defn lose? [board]
+(defn loose? [board]
   (if (and (= (count (empty-cells board)) 0)
            (not (merges? board)))
     true
     false))
 
+(defn reset-board [board]
+  (swap! board new-board))
+
+(defn loose [board frame]
+  (JOptionPane/showMessageDialog frame "You Lose!")
+  (reset-board board))
+
+(defn update-board [frame board f]
+  (if (loose? @board)
+    (loose board frame)
+    (swap! board f @board)))
+
+(defn draw-board [g board]
+  (.setColor g (Color. 230 230 230))
+  (doseq [x (range board-width)
+          y (range board-height)]
+    (println x y)
+    (.fillRect g
+               (+ (inc (* 1 x)) (* cell-width x))
+               (+ (inc (* 1 y)) (* cell-height y))
+               cell-width
+               cell-height)))
+
+(defn game-panel [frame board]
+  (proxy [JPanel KeyListener] []
+    (paintComponent [g]
+      (proxy-super paintComponent g)
+      (draw-board g @board))
+    (keyPressed [e]
+      (case (.getKeyCode e)
+        java.awt.KeyEvent/VK_LEFT (update-board frame board move-left)
+        java.awt.KeyEvent/VK_RIGHT (update-board frame board move-right)
+        java.awt.KeyEvent/VK_UP (update-board frame board move-up)
+        java.awt.KeyEvent/VK_DOWN (update-board frame board move-down))
+      (.repaint this))
+    (getPreferredSize []
+      (Dimension. (inc (* board-width (inc cell-width)))
+                  (inc (* board-height (inc cell-height)))))
+    (keyReleased [e])
+    (keyTyped [e])))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (println "Hello, World!"))
+  (let [board (atom (new-board))
+        frame (JFrame. "2048 by Alexander")
+        panel (game-panel frame board)]
+    (doto panel
+      (.setFocusable true)
+      (.addKeyListener panel))
+    (doto frame
+      (.add panel)
+      (.pack)
+      (.setVisible true))))
