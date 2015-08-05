@@ -118,6 +118,19 @@
       (move-columns-down)
       (spawn-cell)))
 
+(defn merge-cells?
+  "Проверяет можно ли объединить ячейки"
+  [board ks]
+  (reduce #(fn [t? [k1 k2]]
+             (or t? (= (board k1) (board k2))))
+          false ks))
+
+(defn lose? [board]
+  (if (and (= (count (empty-cells board)) 0)
+           )
+    true
+    false))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
