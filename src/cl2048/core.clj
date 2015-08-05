@@ -40,7 +40,7 @@
 (defn non-empty-row-cells [board n]
   (partition 2 1
              (filter (fn [k] (not (zero? (board k))))
-                     (for [x (range board-width)] [n x]))))
+                     (for [x (range board-width)] [x n]))))
 
 (defn merge-row [board n]
   (merge-cells board (non-empty-row-cells board n)))
@@ -51,7 +51,7 @@
 (defn non-empty-column-cells [board n]
   (partition 2 1
              (filter (fn [k] (not (zero? (board k))))
-                     (for [y (range board-width)] [y n]))))
+                     (for [y (range board-width)] [n y]))))
 
 (defn merge-column [board n]
   (merge-cells board (non-empty-column-cells board n)))
@@ -61,8 +61,8 @@
 
 (defn move-cells [board n side]
   (let [ks (if (or (= side :left) (= side :right))
-             (for [x (range board-width)] [n x])
-             (for [y (range board-height)] [y n]))
+             (for [x (range board-width)] [x n])
+             (for [y (range board-height)] [n y]))
         vs (for [k ks] (board k))
         nz (vec (filter (complement zero?) vs))
         n (- board-width (count nz))]
@@ -158,18 +158,23 @@
 (defn update-board [frame board f]
   (if (loose? @board)
     (loose board frame)
-    (swap! board f @board)))
+    (swap! board f))
+  (println @board))
 
 (defn draw-board [g board]
-  (.setColor g (Color. 230 230 230))
   (doseq [x (range board-width)
           y (range board-height)]
-    (println x y)
+    (.setColor g (Color. 230 230 230))
     (.fillRect g
                (+ (inc (* 1 x)) (* cell-width x))
                (+ (inc (* 1 y)) (* cell-height y))
                cell-width
-               cell-height)))
+               cell-height)
+    (when (not (zero? (board [x y])))
+      (.setColor g (Color. 0 0 0))
+      (.drawString g (str (board [x y]))
+                   (+ 10 (* 1 x) (* cell-width x))
+                   (+ 30 (* 1 y) (* cell-height y))))))
 
 (defn game-panel [frame board]
   (proxy [JPanel KeyListener] []
@@ -177,11 +182,17 @@
       (proxy-super paintComponent g)
       (draw-board g @board))
     (keyPressed [e]
-      (case (.getKeyCode e)
-        java.awt.KeyEvent/VK_LEFT (update-board frame board move-left)
-        java.awt.KeyEvent/VK_RIGHT (update-board frame board move-right)
-        java.awt.KeyEvent/VK_UP (update-board frame board move-up)
-        java.awt.KeyEvent/VK_DOWN (update-board frame board move-down))
+      (println "key pressed" (.getKeyCode e))
+      (let [key (.getKeyCode e)]
+        (cond
+          (= key java.awt.event.KeyEvent/VK_LEFT)
+          (update-board frame board move-left)
+          (= key java.awt.event.KeyEvent/VK_RIGHT)
+          (update-board frame board move-right)
+          (= key java.awt.event.KeyEvent/VK_UP)
+          (update-board frame board move-up)
+          (= key java.awt.event.KeyEvent/VK_DOWN)
+          (update-board frame board move-down))) 
       (.repaint this))
     (getPreferredSize []
       (Dimension. (inc (* board-width (inc cell-width)))
