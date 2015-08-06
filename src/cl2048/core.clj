@@ -27,7 +27,7 @@
          (rand-nth (empty-cells board))
          (new-cell-val)))
 
-(defn new-board []
+(defn new-board [& args]
   (spawn-cell (spawn-cell (new-empty-board))))
 
 (defn merge-cells [board ks]
@@ -189,15 +189,8 @@
 (defn reset-board [board]
   (swap! board new-board))
 
-(defn loose [board frame]
-  (JOptionPane/showMessageDialog frame "You Lose!")
-  (reset-board board))
-
 (defn update-board [frame board f]
-  (if (loose? @board)
-    (loose board frame)
-    (swap! board f))
-  (println @board))
+  (swap! board f))
 
 (defn draw-board [g board]
   (.setColor g (Color. 200 200 200))
@@ -224,7 +217,6 @@
       (proxy-super paintComponent g)
       (draw-board g @board))
     (keyPressed [e]
-      (println "key pressed" (.getKeyCode e))
       (let [key (.getKeyCode e)]
         (cond
           (= key java.awt.event.KeyEvent/VK_LEFT)
@@ -242,7 +234,10 @@
           (= key java.awt.event.KeyEvent/VK_DOWN)
           (when (or (merge-columns? @board)
                     (move-columns? @board :down))
-            (update-board frame board move-down)))) 
+            (update-board frame board move-down))))
+      (when (loose? @board)
+        (JOptionPane/showMessageDialog frame "You Lose!")
+        (reset-board board))
       (.repaint this))
     (getPreferredSize []
       (Dimension. (inc (* board-width (inc cell-width)))
@@ -251,7 +246,6 @@
     (keyTyped [e])))
 
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
   (let [board (atom (new-board))
         frame (JFrame. "2048 by Alexander")
