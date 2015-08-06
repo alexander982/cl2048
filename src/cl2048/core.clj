@@ -162,6 +162,10 @@
   (println @board))
 
 (defn draw-board [g board]
+  (.setColor g (Color. 200 200 200))
+  (.fillRect g 0 0
+             (inc (* board-width (inc cell-width)))
+             (inc (* board-height (inc cell-height))))
   (doseq [x (range board-width)
           y (range board-height)]
     (.setColor g (Color. 230 230 230))
