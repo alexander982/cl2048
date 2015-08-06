@@ -65,10 +65,17 @@
 (defn merge-columns [board direction]
   (reduce #(merge-column % %2 direction) board (range board-width)))
 
+(defn cells-coord
+  "Return cells coords of n row or column. what is :row or :column"
+  [n what]
+  (if (= what :row)
+    (for [x (range board-width)] [x n])
+    (for [y (range board-height)] [n y])))
+
 (defn move-cells [board n side]
   (let [ks (if (or (= side :left) (= side :right))
-             (for [x (range board-width)] [x n])
-             (for [y (range board-height)] [n y]))
+             (cells-coord n :row)
+             (cells-coord n :column))
         vs (for [k ks] (board k))
         nz (vec (filter (complement zero?) vs))
         n (- board-width (count nz))]
@@ -76,6 +83,25 @@
                                (if (or (= side :left) (= side :up))
                                  (into nz (repeat n 0))
                                  (into (vec (repeat n 0)) nz))))))
+
+(defn move?
+  "Check if what(:row or :column) n can be moved to side"
+  [board n side what]
+  (let [rc (partition 2 1 (for [k (cells-coord n what)] (board k)))]
+    (reduce (fn [t? [a b]]
+              (or t? (if (and (zero? a) (not (zero? b))) true false)))
+            false
+            (if (or (= side :left) (= side :up))
+              rc
+              (reverse (map reverse rc))))))
+
+(defn move-rows? [board side]
+  (reduce #(or % (move? board %2 side :row))
+          false (range board-height)))
+
+(defn move-columns? [board side]
+  (reduce #(or % (move? board %2 side :column))
+          false (range board-width)))
 
 (defn assoc-kv [map [k v]]
   (assoc map k v))
