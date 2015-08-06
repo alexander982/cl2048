@@ -166,13 +166,19 @@
             (or t? (= (board k1) (board k2))))
           false ks))
 
+(defn merge-rows? [board]
+  (reduce (fn [t? n]
+            (or t? (merge-cells? board (non-empty-row-cells board n))))
+          false (range board-width)))
+
+(defn merge-columns? [board]
+  (reduce (fn [t? n]
+            (or t? (merge-cells? board (non-empty-column-cells board n))))
+          false (range board-height)))
+
 (defn merges? [board]
-  (or (reduce (fn [t? n] (or t? (merge-cells?
-                                 board (non-empty-row-cells board n))))
-              false (range board-width))
-      (reduce (fn [t? n] (or t? (merge-cells?
-                                 board (non-empty-column-cells board n))))
-              false (range board-height))))
+  (or (merge-rows? board)
+      (merge-columns? board)))
 
 (defn loose? [board]
   (if (and (= (count (empty-cells board)) 0)
