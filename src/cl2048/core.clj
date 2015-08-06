@@ -237,11 +237,11 @@
             (update-board frame board move-right))
           (= key java.awt.event.KeyEvent/VK_UP)
           (when (or (merge-columns? @board)
-                    (move-columns? board :up))
+                    (move-columns? @board :up))
             (update-board frame board move-up))
           (= key java.awt.event.KeyEvent/VK_DOWN)
           (when (or (merge-columns? @board)
-                    (move-columns? board :down))
+                    (move-columns? @board :down))
             (update-board frame board move-down)))) 
       (.repaint this))
     (getPreferredSize []
