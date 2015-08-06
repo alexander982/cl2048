@@ -42,22 +42,28 @@
              (filter (fn [k] (not (zero? (board k))))
                      (for [x (range board-width)] [x n]))))
 
-(defn merge-row [board n]
-  (merge-cells board (non-empty-row-cells board n)))
+(defn merge-row [board n direction]
+  (merge-cells board (if (= direction :left-to-right)
+                       (non-empty-row-cells board n)
+                       (reverse (map reverse
+                                     (non-empty-row-cells board n))))))
 
-(defn merge-rows [board]
-  (reduce #(merge-row % %2) board (range board-height)))
+(defn merge-rows [board direction]
+  (reduce #(merge-row % %2 direction) board (range board-height)))
 
 (defn non-empty-column-cells [board n]
   (partition 2 1
              (filter (fn [k] (not (zero? (board k))))
                      (for [y (range board-width)] [n y]))))
 
-(defn merge-column [board n]
-  (merge-cells board (non-empty-column-cells board n)))
+(defn merge-column [board n direction]
+  (merge-cells board (if (= direction :up-down)
+                       (non-empty-column-cells board n)
+                       (reverse (map reverse
+                                     (non-empty-column-cells board n))))))
 
-(defn merge-columns [board]
-  (reduce #(merge-column % %2) board (range board-width)))
+(defn merge-columns [board direction]
+  (reduce #(merge-column % %2 direction) board (range board-width)))
 
 (defn move-cells [board n side]
   (let [ks (if (or (= side :left) (= side :right))
@@ -105,25 +111,25 @@
 
 (defn move-left [board]
   (-> board
-      (merge-rows)
+      (merge-rows :left-to-right)
       (move-rows-left)
       (spawn-cell)))
 
 (defn move-right [board]
   (-> board
-      (merge-rows)
+      (merge-rows :right-to-left)
       (move-rows-right)
       (spawn-cell)))
 
 (defn move-up [board]
   (-> board
-      (merge-columns)
+      (merge-columns :up-down)
       (move-columns-up)
       (spawn-cell)))
 
 (defn move-down [board]
   (-> board
-      (merge-columns)
+      (merge-columns :down-up)
       (move-columns-down)
       (spawn-cell)))
 
@@ -216,4 +222,5 @@
     (doto frame
       (.add panel)
       (.pack)
+      #_(.setResizable false)
       (.setVisible true))))
