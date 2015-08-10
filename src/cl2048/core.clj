@@ -203,27 +203,37 @@
             (or t? (= (board k1) (board k2))))
           false ks))
 
-(defn merge-rows? [board]
+(defn merge-rows?
+  "Check if there is merges in rows of board"
+  [board]
   (reduce (fn [t? n]
             (or t? (merge-cells? board (non-empty-row-cells board n))))
           false (range board-width)))
 
-(defn merge-columns? [board]
+(defn merge-columns?
+  "Check if there is merges in the cloumns of board"
+  [board]
   (reduce (fn [t? n]
             (or t? (merge-cells? board (non-empty-column-cells board n))))
           false (range board-height)))
 
-(defn merges? [board]
+(defn merges?
+  "Check if board has any merges"
+  [board]
   (or (merge-rows? board)
       (merge-columns? board)))
 
-(defn loose? [board]
+(defn loose?
+  "Check if board does not have any moves or merges"
+  [board]
   (if (and (= (count (empty-cells board)) 0)
            (not (merges? board)))
     true
     false))
 
-(defn reset-board [board]
+(defn reset-board
+  "Set new board"
+  [board]
   (swap! board new-board))
 
 (defn update-board [frame board f]
@@ -285,7 +295,7 @@
 (defn -main
   [& args]
   (let [board (atom (new-board))
-        frame (JFrame. "2048 by Alexander")
+        frame (JFrame. "2048")
         panel (game-panel frame board)]
     (doto panel
       (.setFocusable true)
