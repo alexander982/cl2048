@@ -8,6 +8,8 @@
 (def board-height 4)
 (def cell-width 60)
 (def cell-height 60)
+(def left-margin 2)
+(def up-margin 24)
 
 (defn new-empty-board []
   (apply hash-map (interleave
@@ -249,21 +251,21 @@
 (defn draw-board [g board]
   (.setColor g (Color. 200 200 200))
   (.fillRect g 0 0
-             (inc (* board-width (inc cell-width)))
-             (inc (* board-height (inc cell-height))))
+             (+ left-margin 2 (inc (* board-width (inc cell-width))))
+             (+ up-margin 2 (inc (* board-height (inc cell-height)))))
   (doseq [x (range board-width)
           y (range board-height)]
     (.setColor g (Color. 230 230 230))
     (.fillRect g
-               (+ (inc (* 1 x)) (* cell-width x))
-               (+ (inc (* 1 y)) (* cell-height y))
+               (+ left-margin (inc (* 1 x)) (* cell-width x))
+               (+ up-margin (inc (* 1 y)) (* cell-height y))
                cell-width
                cell-height)
     (when (not (zero? (board [x y])))
       (.setColor g (Color. 0 0 0))
       (.drawString g (str (board [x y]))
-                   (+ 10 (* 1 x) (* cell-width x))
-                   (+ 30 (* 1 y) (* cell-height y))))))
+                   (+ 10 left-margin (* 1 x) (* cell-width x))
+                   (+ 30 up-margin (* 1 y) (* cell-height y))))))
 
 (defn game-panel [frame game]
   (proxy [JPanel KeyListener] []
@@ -295,8 +297,8 @@
           (reset-game game)))
       (.repaint this))
     (getPreferredSize []
-      (Dimension. (inc (* board-width (inc cell-width)))
-                  (inc (* board-height (inc cell-height)))))
+      (Dimension. (+ left-margin (inc (* board-width (inc cell-width))))
+                  (+ up-margin (inc (* board-height (inc cell-height))))))
     (keyReleased [e])
     (keyTyped [e])))
 
@@ -312,5 +314,5 @@
       (.add panel)
       (.pack)
       (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)
-      #_(.setResizable false)
+      (.setResizable false)
       (.setVisible true))))
