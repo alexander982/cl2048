@@ -179,29 +179,29 @@
   (reduce move-column-down board (range board-height)))
 ;;;fixme
 
-(defn move-left [board]
-  (-> board
-      (merge-rows :left-to-right)
-      (move-rows-left)
-      (spawn-cell)))
+(defn move-left [{board :board :as game}]
+  (assoc-in game [:board] (-> board
+                               (merge-rows :left-to-right)
+                               (move-rows-left)
+                               (spawn-cell))))
 
-(defn move-right [board]
-  (-> board
-      (merge-rows :right-to-left)
-      (move-rows-right)
-      (spawn-cell)))
+(defn move-right [{board :board :as game}]
+  (assoc-in game [:board] (-> board
+                               (merge-rows :right-to-left)
+                               (move-rows-right)
+                               (spawn-cell))))
 
-(defn move-up [board]
-  (-> board
-      (merge-columns :up-down)
-      (move-columns-up)
-      (spawn-cell)))
+(defn move-up [{board :board :as game}]
+  (assoc-in game [:board] (-> board
+                               (merge-columns :up-down)
+                               (move-columns-up)
+                               (spawn-cell))))
 
-(defn move-down [board]
-  (-> board
-      (merge-columns :down-up)
-      (move-columns-down)
-      (spawn-cell)))
+(defn move-down [{board :board :as game}]
+  (assoc-in game [:board] (-> board
+                               (merge-columns :down-up)
+                               (move-columns-down)
+                               (spawn-cell))))
 
 (defn merge-cells?
   "Проверяет можно ли объединить ячейки"
@@ -238,13 +238,13 @@
     true
     false))
 
-(defn reset-board
-  "Set new board"
-  [board]
-  (swap! board new-board))
+(defn reset-game
+  "Set new game"
+  [game]
+  (swap! game new-game))
 
-(defn update-board [frame board f]
-  (swap! board f))
+(defn update-game [game f]
+  (swap! game f))
 
 (defn draw-board [g board]
   (.setColor g (Color. 200 200 200))
@@ -265,33 +265,34 @@
                    (+ 10 (* 1 x) (* cell-width x))
                    (+ 30 (* 1 y) (* cell-height y))))))
 
-(defn game-panel [frame board]
+(defn game-panel [frame game]
   (proxy [JPanel KeyListener] []
     (paintComponent [g]
       (proxy-super paintComponent g)
-      (draw-board g @board))
+      (draw-board g (@game :board)))
     (keyPressed [e]
-      (let [key (.getKeyCode e)]
+      (let [key (.getKeyCode e)
+            board (@game :board)]
         (cond
           (= key java.awt.event.KeyEvent/VK_LEFT)
-          (when (or (merge-rows? @board)
-                    (move-rows? @board :left))
-            (update-board frame board move-left))
+          (when (or (merge-rows? board)
+                    (move-rows? board :left))
+            (update-game game move-left))
           (= key java.awt.event.KeyEvent/VK_RIGHT)
-          (when (or (merge-rows? @board)
-                    (move-rows? @board :right))
-            (update-board frame board move-right))
+          (when (or (merge-rows? board)
+                    (move-rows? board :right))
+            (update-game game move-right))
           (= key java.awt.event.KeyEvent/VK_UP)
-          (when (or (merge-columns? @board)
-                    (move-columns? @board :up))
-            (update-board frame board move-up))
+          (when (or (merge-columns? board)
+                    (move-columns? board :up))
+            (update-game game move-up))
           (= key java.awt.event.KeyEvent/VK_DOWN)
-          (when (or (merge-columns? @board)
-                    (move-columns? @board :down))
-            (update-board frame board move-down))))
-      (when (loose? @board)
-        (JOptionPane/showMessageDialog frame "You Lose!")
-        (reset-board board))
+          (when (or (merge-columns? board)
+                    (move-columns? board :down))
+            (update-game game move-down)))
+        (when (loose? board)
+          (JOptionPane/showMessageDialog frame "You Lose!")
+          (reset-game game)))
       (.repaint this))
     (getPreferredSize []
       (Dimension. (inc (* board-width (inc cell-width)))
@@ -301,9 +302,9 @@
 
 (defn -main
   [& args]
-  (let [board (atom (new-board))
+  (let [game (atom (new-game))
         frame (JFrame. "2048")
-        panel (game-panel frame board)]
+        panel (game-panel frame game)]
     (doto panel
       (.setFocusable true)
       (.addKeyListener panel))
