@@ -40,6 +40,13 @@
   [& args]
   (spawn-cell (spawn-cell (new-empty-board))))
 
+(defn new-game
+  "Return new game map"
+  []
+  {:score 0
+   :hiscore 0
+   :board (new-board)})
+
 (defn merge-cells
   "Проверяет соседние клетки списка координат ks на равенство и
   увеличивает значение первой кнопки в два раза а вторую обнуляет.
