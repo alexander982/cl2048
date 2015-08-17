@@ -42,7 +42,7 @@
 
 (defn new-game
   "Return new game map"
-  []
+  [& args]
   {:score 0
    :hiscore 0
    :board (new-board)})
