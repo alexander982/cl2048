@@ -284,7 +284,7 @@
 
 ;gui
 
-(defn draw-board [g board]
+(defn draw-board [g {:keys [board score hiscore]}]
   (.setColor g (Color. 200 200 200))
   (.fillRect g 0 0
              (+ left-margin 2 (inc (* board-width (inc cell-width))))
@@ -301,13 +301,20 @@
       (.setColor g (Color. 0 0 0))
       (.drawString g (str (board [x y]))
                    (+ 10 left-margin (* 1 x) (* cell-width x))
-                   (+ 30 up-margin (* 1 y) (* cell-height y))))))
+                   (+ 30 up-margin (* 1 y) (* cell-height y)))))
+  (.setColor g (Color. 0 0 0))
+  ;;draw score
+  (.drawString g (apply str ["Score: " score]) 3 20)
+  ;;draw hiscore
+  (if (> score hiscore)
+    (.drawString g (apply str ["Hiscore: " score]) 125 20)
+    (.drawString g (apply str ["Hiscore: " hiscore]) 125 20)))
 
 (defn game-panel [frame game]
   (proxy [JPanel KeyListener] []
     (paintComponent [g]
       (proxy-super paintComponent g)
-      (draw-board g (@game :board)))
+      (draw-board g @game))
     (keyPressed [e]
       (let [key (.getKeyCode e)
             board (@game :board)]
