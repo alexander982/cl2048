@@ -1,7 +1,10 @@
 (ns cl2048.core
   (:import (java.awt Color Dimension)
            (javax.swing JPanel JFrame JOptionPane)
-           (java.awt.event ActionListener KeyListener WindowListener))
+           (java.awt.event ActionListener KeyListener WindowListener)
+           (java.io PushbackReader))
+  (:require [clojure.java.io :as io]
+            [clojure.edn :as edn])
   (:gen-class))
 
 (def board-width 4)
@@ -363,7 +366,10 @@
 
 (defn -main
   [& args]
-  (let [game (atom (new-game))
+  (let [game (if (.exists (io/file "save~"))
+               (atom (edn/read (PushbackReader.
+                                (io/reader "save~"))))
+               (atom (new-game)))
         frame (JFrame. "2048")
         panel (game-panel frame game)]
     (doto panel
