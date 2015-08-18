@@ -90,6 +90,13 @@
   [board direction]
   (reduce #(merge-row % %2 direction) board (range board-height)))
 
+(defn score-rows
+  "Return score for merging all rows"
+  [board]
+  (reduce (fn [s n] (+ s (score-cells board
+                                      (non-empty-row-cells board n))))
+          0 (range board-height)))
+
 (defn non-empty-column-cells
   "Возвращает список пар координат столбца непустых ячеек игровой зоны"
   [board n]
