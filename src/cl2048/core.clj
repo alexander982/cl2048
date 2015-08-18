@@ -63,10 +63,18 @@
 (defn score-cells
   "Count a score value of given cells pairs"
   [board ks]
-  (reduce (fn [s [c1 c2]]
-            (let [a (board c1) b (board c2)]
-              (if (= a b ) (+ s a b) s)))
-          0 ks))
+  (let [game (assoc {} :board board :score 0)]
+    ((reduce (fn [g [c1 c2]]
+               (let [a ((g :board) c1)
+                     b ((g :board) c2)
+                     s (g :score)]
+                 (if (= a b )
+                   (-> (assoc g :score (+ s a b))
+                       (assoc-in [:board c1] (* 2 a))
+                       (assoc-in [:board c2] 0))
+                   g)))
+             game ks)
+     :score)))
 
 (defn non-empty-row-cells
   "Возвращает список пар координат строки непустых ячеек игровой зоны"
