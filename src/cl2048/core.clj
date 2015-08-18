@@ -58,7 +58,15 @@
               (if (= (b c1) (b c2))
                 (assoc (assoc b c1 (* (b c1) 2)) c2 0)
                 b))
-            board ks))
+          board ks))
+
+(defn score-cells
+  "Count a score value of given cells pairs"
+  [board ks]
+  (reduce (fn [s [c1 c2]]
+            (let [a (board c1) b (board c2)]
+              (if (= a b ) (+ s a b) s)))
+          0 ks))
 
 (defn non-empty-row-cells
   "Возвращает список пар координат строки непустых ячеек игровой зоны"
