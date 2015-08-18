@@ -119,6 +119,13 @@
   [board direction]
   (reduce #(merge-column % %2 direction) board (range board-width)))
 
+(defn score-columns
+  "Return score for merging all columns"
+  [board]
+  (reduce (fn [s n] (+ s (score-cells board
+                                      (non-empty-column-cells board n))))
+          0 (range board-width)))
+
 (defn cells-coord
   "Return cells coords of n row or column. what is :row or :column"
   [n what]
