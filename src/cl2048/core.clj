@@ -1,7 +1,7 @@
 (ns cl2048.core
   (:import (java.awt Color Dimension)
            (javax.swing JPanel JFrame JOptionPane)
-           (java.awt.event ActionListener KeyListener))
+           (java.awt.event ActionListener KeyListener WindowListener))
   (:gen-class))
 
 (def board-width 4)
@@ -45,9 +45,14 @@
 (defn new-game
   "Return new game map"
   [& args]
-  {:score 0
-   :hiscore 0
-   :board (new-board)})
+  (if (> (count args) 0)
+    (let [{:keys [score hiscore]} (first args)]
+      {:score 0
+       :hiscore (if (> score hiscore) score hiscore)
+       :board (new-board)})
+    {:score 0
+     :hiscore 0
+     :board (new-board)}))
 
 (defn merge-cells
   "Проверяет соседние клетки списка координат ks на равенство и
@@ -311,7 +316,7 @@
     (.drawString g (apply str ["Hiscore: " hiscore]) 125 20)))
 
 (defn game-panel [frame game]
-  (proxy [JPanel KeyListener] []
+  (proxy [JPanel KeyListener WindowListener] []
     (paintComponent [g]
       (proxy-super paintComponent g)
       (draw-board g @game))
@@ -343,7 +348,18 @@
       (Dimension. (+ left-margin (inc (* board-width (inc cell-width))))
                   (+ up-margin (inc (* board-height (inc cell-height))))))
     (keyReleased [e])
-    (keyTyped [e])))
+    (keyTyped [e])
+    (windowClosing [e]
+      (let [{:keys [score hiscore] :as gm} @game]
+        (if (> score hiscore)
+          (spit "save~" (assoc gm :hiscore score))
+          (spit "save~" gm))))
+    (windowActivated [e])
+    (windowClosed [e])
+    (windowDeactivated [e])
+    (windowDeiconified [e])
+    (windowIconified [e])
+    (windowOpened [e])))
 
 (defn -main
   [& args]
@@ -356,6 +372,7 @@
     (doto frame
       (.add panel)
       (.pack)
+      (.addWindowListener panel)
       (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)
       (.setResizable false)
       (.setVisible true))))
