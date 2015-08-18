@@ -211,29 +211,33 @@
   (reduce move-column-down board (range board-height)))
 ;;;fixme
 
-(defn move-left [{board :board :as game}]
-  (assoc-in game [:board] (-> board
-                               (merge-rows :left-to-right)
-                               (move-rows-left)
-                               (spawn-cell))))
+(defn move-left [{:keys [board score] :as game}]
+  (-> (assoc-in game [:board] (-> board
+                                  (merge-rows :left-to-right)
+                                  (move-rows-left)
+                                  (spawn-cell)))
+      (assoc :score (+ score (score-rows board)))))
 
-(defn move-right [{board :board :as game}]
-  (assoc-in game [:board] (-> board
-                               (merge-rows :right-to-left)
-                               (move-rows-right)
-                               (spawn-cell))))
+(defn move-right [{:keys [board score] :as game}]
+  (-> (assoc-in game [:board] (-> board
+                                  (merge-rows :right-to-left)
+                                  (move-rows-right)
+                                  (spawn-cell)))
+      (assoc :score (+ score (score-rows board)))))
 
-(defn move-up [{board :board :as game}]
-  (assoc-in game [:board] (-> board
-                               (merge-columns :up-down)
-                               (move-columns-up)
-                               (spawn-cell))))
+(defn move-up [{:keys [board score] :as game}]
+  (-> (assoc-in game [:board] (-> board
+                                  (merge-columns :up-down)
+                                  (move-columns-up)
+                                  (spawn-cell)))
+      (assoc :score (+ score (score-columns board)))))
 
-(defn move-down [{board :board :as game}]
-  (assoc-in game [:board] (-> board
+(defn move-down [{:keys [board score] :as game}]
+  (-> (assoc-in game [:board] (-> board
                                (merge-columns :down-up)
                                (move-columns-down)
-                               (spawn-cell))))
+                               (spawn-cell)))
+      (assoc :score (+ score (score-columns board)))))
 
 (defn merge-cells?
   "Проверяет можно ли объединить ячейки"
@@ -277,6 +281,8 @@
 
 (defn update-game [game f]
   (swap! game f))
+
+;gui
 
 (defn draw-board [g board]
   (.setColor g (Color. 200 200 200))
