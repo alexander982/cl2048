@@ -15,33 +15,32 @@
 (def up-margin 24)
 
 (defn new-empty-board []
+  "Generate totaly empty board as map with coordinate vectors as keys"
   (apply hash-map (interleave
                    (for [x (range board-width)
                          y (range board-height)] [x y])
                    (for [v (range (* board-width board-height))] 0))))
 
 (defn empty-cells
-  "Возвращает список координат пустых ячеек"
+  "Return sequence of empty cells keys"
   [board]
   (let [ks (keys board)]
     (filter #(zero? (get board %)) ks)))
 
 (defn new-cell-val
-  "Возвращает новое значение ячейки, которое может быть 4 или 2.
-  Вероятность появления 2 выше чем 4."
+  "Generate new cell value to spawn"
   []
-  (if (> (rand) 0.8) 4 2))
+  (if (> (rand) 0.9) 4 2))
 
 (defn spawn-cell
-  "Возвращает массив игровой зоны с добавленным в случайную ячейку
-  новым значением"
+  "Add 2 or 4 on random empty cell"
   [board]
   (assoc board
          (rand-nth (empty-cells board))
          (new-cell-val)))
 
 (defn new-board
-  "Возвращает массив с двумя непустыми ячейками"
+  "Return map of new game board"
   [& args]
   (spawn-cell (spawn-cell (new-empty-board))))
 
@@ -58,9 +57,10 @@
      :board (new-board)}))
 
 (defn merge-cells
-  "Проверяет соседние клетки списка координат ks на равенство и
-  увеличивает значение первой кнопки в два раза а вторую обнуляет.
-  ks - список пар коодинат ((с1 с2) .. )"
+  "Merge cells if its values are equal
+
+  Check of cells pairs in ks sequence for equality and merge them if so.
+  ks - ((с1 с2) .. ). Return map with cells merged."
   [board ks]
   (reduce (fn [b [c1 c2]]
               (if (= (b c1) (b c2))
@@ -85,15 +85,14 @@
      :score)))
 
 (defn non-empty-row-cells
-  "Возвращает список пар координат строки непустых ячеек игровой зоны"
+  "Return non empty cels pairs coordinates of a board in row n"
   [board n]
   (partition 2 1
              (filter (fn [k] (not (zero? (board k))))
                      (for [x (range board-width)] [x n]))))
 
 (defn merge-row
-  "Возвращает массив в котором ячейки в строке n объединены (если это
-  возможно)"
+  "Merge row n of a board in given direction"
   [board n direction]
   (merge-cells board (if (= direction :left-to-right)
                        (non-empty-row-cells board n)
@@ -101,8 +100,7 @@
                                      (non-empty-row-cells board n))))))
 
 (defn merge-rows
-  "Возвращает массив в котором все ячейки в строке, которые могут быть
-   объединены, слиты вместе"
+  "Merge all rows of a board"
   [board direction]
   (reduce #(merge-row % %2 direction) board (range board-height)))
 
@@ -114,15 +112,14 @@
           0 (range board-height)))
 
 (defn non-empty-column-cells
-  "Возвращает список пар координат столбца непустых ячеек игровой зоны"
+  "Return non empty cells pairs coordinates of collumn n of a board"
   [board n]
   (partition 2 1
              (filter (fn [k] (not (zero? (board k))))
                      (for [y (range board-width)] [n y]))))
 
 (defn merge-column
-  "Возвращает массив в котором ячейки в столбце n объединены (если это
-  возможно)"
+  "Merge column n of a board in given direction"
   [board n direction]
   (merge-cells board (if (= direction :up-down)
                        (non-empty-column-cells board n)
@@ -130,8 +127,7 @@
                                      (non-empty-column-cells board n))))))
 
 (defn merge-columns
-  "Возвращает массив в котором все ячейки в столбце, которые могут быть
-  объединены, слиты вместе"
+  "Merge all columns of a board in given direction"
   [board direction]
   (reduce #(merge-column % %2 direction) board (range board-width)))
 
@@ -150,9 +146,8 @@
     (for [y (range board-height)] [n y])))
 
 (defn move-cells [board n side]
-  "Возвращает список пар ключ значение строки или столбца n (зависит от 
-   стороны side) сдвинутых в сторону side. side может быть :left, :right
-   :up, :down"
+  "Return sequence of row or colum n of a board coordinates and values
+   moved to side. Where side is :left, :right, :up or :down"
   (let [ks (if (or (= side :left) (= side :right))
              (cells-coord n :row)
              (cells-coord n :column))
@@ -165,7 +160,7 @@
                                  (into (vec (repeat n 0)) nz))))))
 
 (defn move?
-  "Check if what(:row or :column) n can be moved to side"
+  "Check if what(:row or :column) n can be moved to a side"
   [board n side what]
   (let [rc (partition 2 1 (for [k (cells-coord n what)] (board k)))]
     (reduce (fn [t? [a b]]
@@ -219,28 +214,36 @@
   (reduce move-column-down board (range board-height)))
 ;;;fixme
 
-(defn move-left [{:keys [board score] :as game}]
+(defn move-left
+  "Update board and score on move to the left"
+  [{:keys [board score] :as game}]
   (-> (assoc-in game [:board] (-> board
                                   (merge-rows :left-to-right)
                                   (move-rows-left)
                                   (spawn-cell)))
       (assoc :score (+ score (score-rows board)))))
 
-(defn move-right [{:keys [board score] :as game}]
+(defn move-right
+  "Update board and score on move to the right"
+  [{:keys [board score] :as game}]
   (-> (assoc-in game [:board] (-> board
                                   (merge-rows :right-to-left)
                                   (move-rows-right)
                                   (spawn-cell)))
       (assoc :score (+ score (score-rows board)))))
 
-(defn move-up [{:keys [board score] :as game}]
+(defn move-up
+  "Update board and score on move up"
+  [{:keys [board score] :as game}]
   (-> (assoc-in game [:board] (-> board
                                   (merge-columns :up-down)
                                   (move-columns-up)
                                   (spawn-cell)))
       (assoc :score (+ score (score-columns board)))))
 
-(defn move-down [{:keys [board score] :as game}]
+(defn move-down
+  "Update board and score on move down"
+  [{:keys [board score] :as game}]
   (-> (assoc-in game [:board] (-> board
                                (merge-columns :down-up)
                                (move-columns-down)
@@ -248,7 +251,7 @@
       (assoc :score (+ score (score-columns board)))))
 
 (defn merge-cells?
-  "Проверяет можно ли объединить ячейки"
+  "Check if there is a merges in given coordinates of cells pairs"
   [board ks]
   (reduce (fn [t? [k1 k2]]
             (or t? (= (board k1) (board k2))))
@@ -290,7 +293,7 @@
 (defn update-game [game f]
   (swap! game f))
 
-;gui
+;=== gui
 
 (defn draw-board [g {:keys [board score hiscore]}]
   (.setColor g (Color. 200 200 200))
