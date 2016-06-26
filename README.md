@@ -1,36 +1,21 @@
 # cl2048
 
-FIXME: description
+Clone of popular 2048 game.
 
-## Installation
+## Features
 
-Download from http://example.com/FIXME.
+* game state saved automaticaly when you exit and restored when next
+  time start the game.
+* hiscore
 
 ## Usage
 
-FIXME: explanation
+You can make a jar file with:
+
+    $ lein uberjar
+
+The cd to target directory and type:
 
     $ java -jar cl2048-0.1.0-standalone.jar [args]
 
-## Options
 
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2015 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
