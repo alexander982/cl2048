@@ -5,17 +5,22 @@ Clone of popular 2048 game.
 ## Features
 
 * game state saved automaticaly when you exit and restored when next
-  time start the game.
+  time you start the game.
 * hiscore
 
 ## Usage
 
-You can make a jar file with:
+You need leiningen 2.0+ to build and/or run the game.
+To run the game type:
+
+    $ lein run
+
+You can make an executable jar file with:
 
     $ lein uberjar
 
-The cd to target directory and type:
+Then cd to target directory and type:
 
-    $ java -jar cl2048-0.1.0-standalone.jar [args]
+    $ java -jar cl2048-0.1.0-standalone.jar
 
 
