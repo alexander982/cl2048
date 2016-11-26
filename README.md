@@ -12,7 +12,7 @@ Clone of popular 2048 game.
 You can run game with leiningen and source files or you can download binary jar file.
 
 ### Binary file
-Download [jar](https://github.com/alexander982/cl2048/releases) file by double click on it. If it does not work on your system, you can run it from console.
+Run [jar](https://github.com/alexander982/cl2048/releases) file by double click on it. If it does not work on your system, you can run it from console.
 
     $ java -jar cl2048-0.1.0-standalone.jar
 
